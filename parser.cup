@@ -1,0 +1,32 @@
+import java_cup.runtime.*;
+
+parser code {:
+    private Environment env = new Environment();
+:};
+
+terminal NUMBER, IDENTIFIER;
+terminal PLUS, MINUS, MUL, DIV, ASSIGN;
+terminal IF, ELSE, WHILE, FOR, PRINT, BEGIN, END;
+terminal LPAREN, RPAREN;
+
+non terminal program, statement_list, statement, expr;
+
+program ::= statement_list;
+
+statement_list ::= statement_list statement
+                 | statement;
+
+statement ::= "let" IDENTIFIER ASSIGN expr    {: env.set($2.toString(), (Integer)$4); :}
+            | "print" expr                    {: System.out.println($2); :};
+
+expr ::= expr PLUS term                      {: RESULT = (Integer)$1 + (Integer)$3; :}
+       | expr MINUS term                     {: RESULT = (Integer)$1 - (Integer)$3; :}
+       | term                               {: RESULT = $1; :};
+
+term ::= term MUL factor                     {: RESULT = (Integer)$1 * (Integer)$3; :}
+       | term DIV factor                     {: RESULT = (Integer)$1 / (Integer)$3; :}
+       | factor                             {: RESULT = $1; :};
+
+factor ::= NUMBER                            {: RESULT = Integer.parseInt($1.toString()); :}
+         | IDENTIFIER                       {: RESULT = env.get($1.toString()); :}
+         | LPAREN expr RPAREN               {: RESULT = $2; :};
